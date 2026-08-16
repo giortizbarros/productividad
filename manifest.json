@@ -1,0 +1,12 @@
+{
+  "name": "Ritmo — Planificador semanal",
+  "short_name": "Ritmo",
+  "description": "Organizá tu semana hora por hora y mantené tu ritmo por encima del 70% cada día.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#fbf7f1",
+  "theme_color": "#234e45",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

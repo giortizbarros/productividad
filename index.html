@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Ritmo — Planificador semanal</title>
+<meta name="description" content="Organizá tu semana hora por hora, marcá lo que cumplís y mantené tu ritmo por encima del 70% cada día." />
+<meta name="theme-color" content="#234E45" />
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" type="image/svg+xml" href="icon.svg" />
+<link rel="apple-touch-icon" href="icon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+<div class="app">
+
+  <header class="topbar">
+    <div class="brand">
+      <svg class="brand-mark" width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="13" cy="13" r="11" stroke="currentColor" stroke-width="2"/>
+        <path d="M13 6.5V13L17 15.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="brand-name">Ritmo</span>
+    </div>
+
+    <div class="week-nav">
+      <button class="icon-btn" id="prevWeek" aria-label="Semana anterior">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M15 6l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+      <div class="week-label">
+        <span id="weekRange">—</span>
+        <button class="link-btn" id="todayBtn">Hoy</button>
+      </div>
+      <button class="icon-btn" id="nextWeek" aria-label="Semana siguiente">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M9 6l6 6-6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </button>
+    </div>
+
+    <div class="topbar-actions">
+      <span class="week-avg" id="weekAvg" title="Promedio de cumplimiento de la semana"></span>
+      <button class="icon-btn" id="themeToggle" aria-label="Cambiar tema">
+        <svg id="themeIcon" width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 3a9 9 0 1 0 9 9c0-.46-.04-.91-.1-1.36A5.5 5.5 0 0 1 12 3z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></svg>
+      </button>
+      <button class="icon-btn" id="settingsToggle" aria-label="Ajustes de recordatorio">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3" stroke="currentColor" stroke-width="2"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" stroke="currentColor" stroke-width="1.6"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="week-rail" id="dayTabs" aria-label="Días de la semana"></nav>
+
+    <main class="day-view">
+      <section class="day-header">
+        <div class="day-ring-wrap">
+          <svg class="day-ring" width="72" height="72" viewBox="0 0 72 72">
+            <circle class="ring-track" cx="36" cy="36" r="30" fill="none" stroke-width="7"/>
+            <circle class="ring-progress" id="dayRingProgress" cx="36" cy="36" r="30" fill="none" stroke-width="7" stroke-linecap="round"/>
+          </svg>
+          <span class="day-ring-percent" id="dayPercent">0%</span>
+        </div>
+        <div class="day-header-text">
+          <h1 id="dayTitle">—</h1>
+          <p id="dayFraction" class="muted">Sin tareas todavía</p>
+        </div>
+      </section>
+
+      <div class="banner" id="alertBanner" hidden role="alert">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 9v4M12 17h.01M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L14.71 3.86a2 2 0 0 0-3.42 0z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        <p><span id="alertText"></span></p>
+        <button class="link-btn" id="alertDismiss">Ocultar</button>
+      </div>
+
+      <form class="quick-add" id="quickAddForm">
+        <input type="text" id="quickAddTitle" placeholder="Agregar una tarea…" autocomplete="off" required maxlength="140" />
+        <select id="quickAddHour" aria-label="Hora"></select>
+        <button type="submit" class="btn-primary">Agregar</button>
+      </form>
+
+      <ol class="hours" id="hoursList"></ol>
+    </main>
+  </div>
+</div>
+
+<div class="overlay" id="overlay" hidden></div>
+
+<aside class="settings-panel" id="settingsPanel" hidden aria-label="Ajustes de recordatorio">
+  <div class="settings-head">
+    <h2>Recordatorio diario</h2>
+    <button class="icon-btn" id="settingsClose" aria-label="Cerrar ajustes">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+  <p class="muted small">Si al llegar la hora elegida no cumpliste al menos el 70% de las tareas de hoy, Ritmo te va a avisar mientras esta pestaña esté abierta.</p>
+
+  <label class="switch-row">
+    <span>Activar recordatorio</span>
+    <input type="checkbox" id="reminderEnabled" />
+  </label>
+
+  <label class="field-row">
+    <span>Hora del aviso</span>
+    <input type="time" id="reminderTime" value="20:00" />
+  </label>
+
+  <button class="btn-secondary" id="notifPermBtn" type="button">Permitir notificaciones del navegador</button>
+  <p class="muted small" id="notifStatus"></p>
+
+  <div class="settings-divider"></div>
+  <p class="muted small">Los datos se guardan solo en este navegador por ahora. Más adelante se pueden sincronizar con una cuenta.</p>
+</aside>
+
+<div class="toast" id="toast" hidden>
+  <span id="toastText"></span>
+  <button class="link-btn" id="toastUndo">Deshacer</button>
+</div>
+
+<div class="reminder-modal" id="reminderModal" hidden role="dialog" aria-modal="true" aria-labelledby="reminderModalTitle">
+  <div class="reminder-modal-card">
+    <h2 id="reminderModalTitle">Todavía podés llegar al 70%</h2>
+    <p class="muted" id="reminderModalText"></p>
+    <ul class="reminder-modal-list" id="reminderModalList"></ul>
+    <button class="btn-primary" id="reminderModalClose">Entendido</button>
+  </div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>
