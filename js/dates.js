@@ -69,6 +69,15 @@ function monthLong(i) {
   return MONTHS_LONG[i];
 }
 
-export function hourLabel(h) {
-  return `${String(h).padStart(2, "0")}:00`;
+export function hourLabel(h, m = 0) {
+  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+}
+
+export function getHalfHourSlots() {
+  const slots = [];
+  for (let h = 0; h < 24; h++) {
+    slots.push({ hour: h, minute: 0 });
+    slots.push({ hour: h, minute: 30 });
+  }
+  return slots;
 }

@@ -6,6 +6,7 @@ create table if not exists public.tasks (
   user_id uuid not null references auth.users(id) on delete cascade,
   date date not null,
   hour smallint not null check (hour between 0 and 23),
+  minute smallint not null default 0 check (minute in (0, 30)),
   title text not null,
   status text not null default 'pending' check (status in ('pending', 'done', 'skipped')),
   reason text not null default '',

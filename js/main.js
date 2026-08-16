@@ -11,6 +11,7 @@ import {
   formatWeekRange,
   formatDayTitle,
   hourLabel,
+  getHalfHourSlots,
 } from "./dates.js";
 
 // ---------- State ----------
@@ -140,7 +141,9 @@ function dayPercent(date) {
 }
 
 function renderDayView() {
-  const dayTasks = tasksForDate(selectedDate).sort((a, b) => a.hour - b.hour);
+  const dayTasks = tasksForDate(selectedDate).sort(
+    (a, b) => a.hour * 60 + a.minute - (b.hour * 60 + b.minute)
+  );
   const total = dayTasks.length;
   const done = dayTasks.filter((t) => t.status === "done").length;
   const pct = total === 0 ? 0 : Math.round((done / total) * 100);
@@ -163,40 +166,48 @@ function renderDayView() {
     alertBannerEl.hidden = true;
   }
 
-  quickAddHour.value = String(isToday ? new Date().getHours() : 9);
+  if (isToday) {
+    const now = new Date();
+    const nearestMinute = now.getMinutes() < 30 ? 0 : 30;
+    quickAddHour.value = `${now.getHours()}:${nearestMinute}`;
+  } else {
+    quickAddHour.value = "9:0";
+  }
 
   renderHours(dayTasks);
 }
 
 function renderHours(dayTasks) {
   hoursListEl.innerHTML = "";
-  const currentHour = new Date().getHours();
+  const now = new Date();
+  const currentHour = now.getHours();
+  const currentMinute = now.getMinutes() < 30 ? 0 : 30;
   const isToday = isSameDate(selectedDate, new Date());
 
-  for (let h = 0; h < 24; h++) {
+  for (const { hour: h, minute: m } of getHalfHourSlots()) {
     const row = document.createElement("li");
     row.className = "hour-row";
-    if (isToday && h === currentHour) row.classList.add("is-current-hour");
+    if (isToday && h === currentHour && m === currentMinute) row.classList.add("is-current-hour");
 
     const label = document.createElement("span");
     label.className = "hour-label";
-    label.textContent = hourLabel(h);
+    label.textContent = hourLabel(h, m);
     row.appendChild(label);
 
     const body = document.createElement("div");
     body.className = "hour-tasks";
 
-    const hourTasks = dayTasks.filter((t) => t.hour === h);
-    for (const task of hourTasks) {
+    const slotTasks = dayTasks.filter((t) => t.hour === h && t.minute === m);
+    for (const task of slotTasks) {
       body.appendChild(renderTask(task));
     }
 
     const addBtn = document.createElement("button");
     addBtn.className = "hour-add";
     addBtn.type = "button";
-    addBtn.textContent = `Agregar a las ${hourLabel(h)}`;
+    addBtn.textContent = `Agregar a las ${hourLabel(h, m)}`;
     addBtn.addEventListener("click", () => {
-      quickAddHour.value = String(h);
+      quickAddHour.value = `${h}:${m}`;
       quickAddTitle.focus();
     });
     body.appendChild(addBtn);
@@ -356,10 +367,10 @@ async function undoDelete() {
 // ---------- Quick add ----------
 function populateHourSelect() {
   quickAddHour.innerHTML = "";
-  for (let h = 0; h < 24; h++) {
+  for (const { hour: h, minute: m } of getHalfHourSlots()) {
     const opt = document.createElement("option");
-    opt.value = String(h);
-    opt.textContent = hourLabel(h);
+    opt.value = `${h}:${m}`;
+    opt.textContent = hourLabel(h, m);
     quickAddHour.appendChild(opt);
   }
 }
@@ -368,9 +379,9 @@ async function handleQuickAdd(e) {
   e.preventDefault();
   const title = quickAddTitle.value.trim();
   if (!title) return;
-  const hour = Number(quickAddHour.value);
+  const [hour, minute] = quickAddHour.value.split(":").map(Number);
   try {
-    await TaskStore.add({ date: toISODate(selectedDate), hour, title });
+    await TaskStore.add({ date: toISODate(selectedDate), hour, minute, title });
     tasks = await TaskStore.list();
     quickAddTitle.value = "";
     quickAddTitle.focus();
@@ -469,7 +480,7 @@ function triggerReminder(date, pct) {
   list.innerHTML = "";
   for (const t of pending.slice(0, 8)) {
     const li = document.createElement("li");
-    li.textContent = `${hourLabel(t.hour)} · ${t.title}`;
+    li.textContent = `${hourLabel(t.hour, t.minute)} · ${t.title}`;
     list.appendChild(li);
   }
   reminderModal.hidden = false;

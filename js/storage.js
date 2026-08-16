@@ -11,6 +11,7 @@ function rowToTask(row) {
     id: row.id,
     date: row.date,
     hour: row.hour,
+    minute: row.minute || 0,
     title: row.title,
     status: row.status,
     reason: row.reason || "",
@@ -32,16 +33,17 @@ export const TaskStore = {
       .select("*")
       .eq("user_id", userId)
       .order("date", { ascending: true })
-      .order("hour", { ascending: true });
+      .order("hour", { ascending: true })
+      .order("minute", { ascending: true });
     if (error) throw error;
     return data.map(rowToTask);
   },
 
-  async add({ date, hour, title }) {
+  async add({ date, hour, minute, title }) {
     const userId = await currentUserId();
     const { data, error } = await supabase
       .from("tasks")
-      .insert({ user_id: userId, date, hour, title: title.trim(), status: "pending", reason: "" })
+      .insert({ user_id: userId, date, hour, minute, title: title.trim(), status: "pending", reason: "" })
       .select()
       .single();
     if (error) throw error;
@@ -73,6 +75,7 @@ export const TaskStore = {
         user_id: userId,
         date: task.date,
         hour: task.hour,
+        minute: task.minute || 0,
         title: task.title,
         status: task.status,
         reason: task.reason,
