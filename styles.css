@@ -1,10 +1,10 @@
 /* ---------- Tokens ---------- */
 :root {
-  --bg: #fbf7f1;
-  --bg-elevated: #ffffff;
-  --bg-soft: #f3ece0;
-  --bg-soft-2: #ece2d1;
-  --border: #e7dcc9;
+  --bg: #def4f2;
+  --bg-elevated: #fceef6;
+  --bg-soft: #eaf8f6;
+  --bg-soft-2: #f6e2ee;
+  --border: #ecd0e4;
   --text: #2b2420;
   --text-muted: #6b5f52;
 
@@ -36,11 +36,11 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #1b1712;
-    --bg-elevated: #241f19;
-    --bg-soft: #2c2620;
-    --bg-soft-2: #362e25;
-    --border: #3a332a;
+    --bg: #0e2b2a;
+    --bg-elevated: #2a1526;
+    --bg-soft: #12403d;
+    --bg-soft-2: #351a30;
+    --border: #3d2438;
     --text: #f1e9dd;
     --text-muted: #b7aa98;
 
@@ -62,11 +62,11 @@
 }
 
 :root[data-theme="dark"] {
-  --bg: #1b1712;
-  --bg-elevated: #241f19;
-  --bg-soft: #2c2620;
-  --bg-soft-2: #362e25;
-  --border: #3a332a;
+  --bg: #0e2b2a;
+  --bg-elevated: #2a1526;
+  --bg-soft: #12403d;
+  --bg-soft-2: #351a30;
+  --border: #3d2438;
   --text: #f1e9dd;
   --text-muted: #b7aa98;
 
