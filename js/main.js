@@ -191,17 +191,13 @@ function renderTask(task) {
   if (task.status === "done") li.classList.add("is-done");
   if (task.status === "skipped") li.classList.add("is-skipped");
 
-  const check = document.createElement("button");
-  check.className = "task-check";
-  check.type = "button";
-  check.setAttribute("aria-label", "Marcar como completada");
-  check.innerHTML =
-    task.status === "done"
-      ? '<svg width="12" height="12" viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>'
-      : task.status === "skipped"
-      ? '<svg width="10" height="10" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>'
-      : "";
-  check.addEventListener("click", () => toggleDone(task));
+  const doneBtn = document.createElement("button");
+  doneBtn.type = "button";
+  doneBtn.className = "task-side-btn task-side-done";
+  doneBtn.setAttribute("aria-pressed", String(task.status === "done"));
+  doneBtn.innerHTML =
+    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M20 6 9 17l-5-5" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg><span>Hecha</span>';
+  doneBtn.addEventListener("click", () => toggleDone(task));
 
   const body = document.createElement("div");
   body.className = "task-body";
@@ -222,33 +218,29 @@ function renderTask(task) {
     body.appendChild(renderReasonEditor(task));
   }
 
-  const actions = document.createElement("div");
-  actions.className = "task-actions";
+  const delBtn = document.createElement("button");
+  delBtn.type = "button";
+  delBtn.className = "task-delete";
+  delBtn.setAttribute("aria-label", "Eliminar tarea");
+  delBtn.innerHTML =
+    '<svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2m-8 0 1 13a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-13" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  delBtn.addEventListener("click", () => deleteTask(task));
+  body.appendChild(delBtn);
 
   const skipBtn = document.createElement("button");
   skipBtn.type = "button";
-  skipBtn.className = "task-skip";
-  if (task.status === "skipped") skipBtn.classList.add("is-active");
-  skipBtn.setAttribute("aria-label", "Marcar como no realizada");
+  skipBtn.className = "task-side-btn task-side-skip";
+  skipBtn.setAttribute("aria-pressed", String(task.status === "skipped"));
   skipBtn.innerHTML =
-    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M9 12h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>';
+    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M6 6l12 12M18 6 6 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg><span>No hecha</span>';
   skipBtn.addEventListener("click", () => {
     pendingReasonEditorId = pendingReasonEditorId === task.id ? null : task.id;
     renderDayView();
   });
-  actions.appendChild(skipBtn);
 
-  const delBtn = document.createElement("button");
-  delBtn.type = "button";
-  delBtn.setAttribute("aria-label", "Eliminar tarea");
-  delBtn.innerHTML =
-    '<svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2m-8 0 1 13a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2l1-13" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-  delBtn.addEventListener("click", () => deleteTask(task));
-  actions.appendChild(delBtn);
-
-  li.appendChild(check);
+  li.appendChild(doneBtn);
   li.appendChild(body);
-  li.appendChild(actions);
+  li.appendChild(skipBtn);
   return li;
 }
 
