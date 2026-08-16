@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Ritmo — Iniciar sesión</title>
+<meta name="theme-color" content="#234E45" />
+<link rel="icon" type="image/svg+xml" href="icon.svg" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body class="auth-body">
+
+<main class="auth-shell">
+  <div class="auth-card">
+    <div class="brand auth-brand">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="13" cy="13" r="11" stroke="currentColor" stroke-width="2"/>
+        <path d="M13 6.5V13L17 15.5" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      <span class="brand-name">Ritmo</span>
+    </div>
+
+    <div id="authConfigWarning" class="auth-warning" hidden>
+      Todavía falta conectar Supabase. Completa <code>SUPABASE_URL</code> y
+      <code>SUPABASE_ANON_KEY</code> en <code>js/config.js</code> con los datos
+      de tu proyecto (Project Settings → API).
+    </div>
+
+    <div id="authArea">
+      <div class="auth-tabs" role="tablist">
+        <button type="button" class="auth-tab is-active" id="tabSignIn" role="tab">Iniciar sesión</button>
+        <button type="button" class="auth-tab" id="tabSignUp" role="tab">Crear cuenta</button>
+      </div>
+
+      <p class="muted small" id="authHint">Ingresa con tu correo y contraseña.</p>
+
+      <form id="authForm" class="auth-form">
+        <label class="auth-field">
+          <span>Correo electrónico</span>
+          <input type="email" id="authEmail" autocomplete="email" required />
+        </label>
+        <label class="auth-field">
+          <span>Contraseña</span>
+          <input type="password" id="authPassword" autocomplete="current-password" required minlength="6" />
+        </label>
+
+        <p class="auth-error" id="authError" hidden></p>
+        <p class="auth-success" id="authSuccess" hidden></p>
+
+        <button type="submit" class="btn-primary auth-submit" id="authSubmit">Iniciar sesión</button>
+      </form>
+    </div>
+  </div>
+</main>
+
+<script type="module" src="js/login.js"></script>
+</body>
+</html>

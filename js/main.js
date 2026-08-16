@@ -1,4 +1,5 @@
 import { TaskStore, SettingsStore } from "./storage.js";
+import { getSession, signOut } from "./auth.js";
 import {
   toISODate,
   fromISODate,
@@ -44,11 +45,31 @@ const reminderModal = el("reminderModal");
 
 const RING_CIRCUMFERENCE = 2 * Math.PI * 30;
 
+function reportError(err) {
+  console.error(err);
+  alert(err?.message || "Ocurrió un error al guardar. Intenta de nuevo.");
+}
+
 // ---------- Init ----------
 async function init() {
+  const session = await getSession();
+  if (!session) {
+    window.location.href = "login.html";
+    return;
+  }
+  el("userEmail").textContent = session.user.email;
+  el("logoutBtn").addEventListener("click", async () => {
+    await signOut();
+    window.location.href = "login.html";
+  });
+
   applyTheme();
   populateHourSelect();
-  tasks = await TaskStore.list();
+  try {
+    tasks = await TaskStore.list();
+  } catch (err) {
+    reportError(err);
+  }
 
   renderAll();
   bindEvents();
@@ -260,10 +281,14 @@ function renderReasonEditor(task) {
   saveBtn.className = "reason-save";
   saveBtn.textContent = "Marcar como no realizada";
   saveBtn.addEventListener("click", async () => {
-    await TaskStore.update(task.id, { status: "skipped", reason: textarea.value.trim() });
-    tasks = await TaskStore.list();
-    pendingReasonEditorId = null;
-    renderAll();
+    try {
+      await TaskStore.update(task.id, { status: "skipped", reason: textarea.value.trim() });
+      tasks = await TaskStore.list();
+      pendingReasonEditorId = null;
+      renderAll();
+    } catch (err) {
+      reportError(err);
+    }
   });
 
   const cancelBtn = document.createElement("button");
@@ -282,17 +307,25 @@ function renderReasonEditor(task) {
 }
 
 async function toggleDone(task) {
-  const nextStatus = task.status === "done" ? "pending" : "done";
-  await TaskStore.update(task.id, { status: nextStatus, reason: nextStatus === "done" ? "" : task.reason });
-  tasks = await TaskStore.list();
-  renderAll();
+  try {
+    const nextStatus = task.status === "done" ? "pending" : "done";
+    await TaskStore.update(task.id, { status: nextStatus, reason: nextStatus === "done" ? "" : task.reason });
+    tasks = await TaskStore.list();
+    renderAll();
+  } catch (err) {
+    reportError(err);
+  }
 }
 
 async function deleteTask(task) {
-  await TaskStore.remove(task.id);
-  tasks = await TaskStore.list();
-  renderAll();
-  showUndoToast(task);
+  try {
+    await TaskStore.remove(task.id);
+    tasks = await TaskStore.list();
+    renderAll();
+    showUndoToast(task);
+  } catch (err) {
+    reportError(err);
+  }
 }
 
 function showUndoToast(removedTask) {
@@ -308,12 +341,16 @@ function showUndoToast(removedTask) {
 
 async function undoDelete() {
   if (!undoBuffer) return;
-  await TaskStore.restore(undoBuffer);
-  tasks = await TaskStore.list();
-  undoBuffer = null;
-  toastEl.hidden = true;
-  clearTimeout(undoTimer);
-  renderAll();
+  try {
+    await TaskStore.restore(undoBuffer);
+    tasks = await TaskStore.list();
+    undoBuffer = null;
+    toastEl.hidden = true;
+    clearTimeout(undoTimer);
+    renderAll();
+  } catch (err) {
+    reportError(err);
+  }
 }
 
 // ---------- Quick add ----------
@@ -332,11 +369,15 @@ async function handleQuickAdd(e) {
   const title = quickAddTitle.value.trim();
   if (!title) return;
   const hour = Number(quickAddHour.value);
-  await TaskStore.add({ date: toISODate(selectedDate), hour, title });
-  tasks = await TaskStore.list();
-  quickAddTitle.value = "";
-  quickAddTitle.focus();
-  renderAll();
+  try {
+    await TaskStore.add({ date: toISODate(selectedDate), hour, title });
+    tasks = await TaskStore.list();
+    quickAddTitle.value = "";
+    quickAddTitle.focus();
+    renderAll();
+  } catch (err) {
+    reportError(err);
+  }
 }
 
 // ---------- Theme ----------

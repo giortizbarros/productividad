@@ -1,69 +1,86 @@
-// Persistence layer. Everything is async (Promise-based) on purpose: today
-// it's backed by localStorage, but the same shape can later be swapped for
-// a Supabase-backed implementation without touching main.js.
+import { supabase } from "./supabaseClient.js";
 
-const TASKS_KEY = "ritmo.tasks.v1";
+// Persistence layer for tasks, backed by Supabase (table `tasks`, see
+// supabase/schema.sql). Settings (theme, reminder) stay in localStorage
+// since those are per-device preferences, not user data to sync.
+
 const SETTINGS_KEY = "ritmo.settings.v1";
 
-function uid() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+function rowToTask(row) {
+  return {
+    id: row.id,
+    date: row.date,
+    hour: row.hour,
+    title: row.title,
+    status: row.status,
+    reason: row.reason || "",
+    createdAt: row.created_at,
+  };
 }
 
-function readTasks() {
-  try {
-    const raw = localStorage.getItem(TASKS_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
-
-function writeTasks(tasks) {
-  localStorage.setItem(TASKS_KEY, JSON.stringify(tasks));
+async function currentUserId() {
+  const { data } = await supabase.auth.getUser();
+  if (!data.user) throw new Error("No hay sesión activa.");
+  return data.user.id;
 }
 
 export const TaskStore = {
   async list() {
-    return readTasks();
+    const userId = await currentUserId();
+    const { data, error } = await supabase
+      .from("tasks")
+      .select("*")
+      .eq("user_id", userId)
+      .order("date", { ascending: true })
+      .order("hour", { ascending: true });
+    if (error) throw error;
+    return data.map(rowToTask);
   },
 
   async add({ date, hour, title }) {
-    const tasks = readTasks();
-    const task = {
-      id: uid(),
-      date,
-      hour,
-      title: title.trim(),
-      status: "pending", // pending | done | skipped
-      reason: "",
-      createdAt: new Date().toISOString(),
-    };
-    tasks.push(task);
-    writeTasks(tasks);
-    return task;
+    const userId = await currentUserId();
+    const { data, error } = await supabase
+      .from("tasks")
+      .insert({ user_id: userId, date, hour, title: title.trim(), status: "pending", reason: "" })
+      .select()
+      .single();
+    if (error) throw error;
+    return rowToTask(data);
   },
 
   async update(id, patch) {
-    const tasks = readTasks();
-    const idx = tasks.findIndex((t) => t.id === id);
-    if (idx === -1) return null;
-    tasks[idx] = { ...tasks[idx], ...patch };
-    writeTasks(tasks);
-    return tasks[idx];
+    const row = {};
+    if (patch.status !== undefined) row.status = patch.status;
+    if (patch.reason !== undefined) row.reason = patch.reason;
+    const { data, error } = await supabase.from("tasks").update(row).eq("id", id).select().single();
+    if (error) throw error;
+    return rowToTask(data);
   },
 
   async remove(id) {
-    const tasks = readTasks();
-    const removed = tasks.find((t) => t.id === id) || null;
-    writeTasks(tasks.filter((t) => t.id !== id));
-    return removed;
+    const { data, error } = await supabase.from("tasks").select("*").eq("id", id).single();
+    if (error) throw error;
+    const { error: delError } = await supabase.from("tasks").delete().eq("id", id);
+    if (delError) throw delError;
+    return rowToTask(data);
   },
 
   async restore(task) {
-    const tasks = readTasks();
-    tasks.push(task);
-    writeTasks(tasks);
-    return task;
+    const userId = await currentUserId();
+    const { data, error } = await supabase
+      .from("tasks")
+      .insert({
+        user_id: userId,
+        date: task.date,
+        hour: task.hour,
+        title: task.title,
+        status: task.status,
+        reason: task.reason,
+      })
+      .select()
+      .single();
+    if (error) throw error;
+    return rowToTask(data);
   },
 };
 
