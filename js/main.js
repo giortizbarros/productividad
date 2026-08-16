@@ -426,7 +426,7 @@ function triggerReminder(date, pct) {
   const pending = tasksForDate(date).filter((t) => t.status !== "done");
 
   if ("Notification" in window && Notification.permission === "granted") {
-    new Notification("Todavía podés llegar al 70%", {
+    new Notification("Todavía puedes llegar al 70%", {
       body: `Vas ${pct}% hoy. Te quedan ${pending.length} tarea${pending.length === 1 ? "" : "s"} pendiente${pending.length === 1 ? "" : "s"}.`,
     });
   }
